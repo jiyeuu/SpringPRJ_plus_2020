@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="poly.persistance.mapper.BoardMapper">
+
+	<insert id="insertBoardInfo" parameterType="BoardDTO">
+	INSERT INTO BOARD(
+		TITLE, 
+		CONTENT, 
+		REG_DATE, 
+		READ_CNT,
+		USER_NAME
+	)VALUES(
+	#{title}, 
+	#{content}, 
+	CURDATE(), 
+	0,
+	#{user_name}
+	
+	)
+	</insert>
+	
+<!-- 게시판 리스트 -->	
+	<select id="getBoardList" resultType="BoardDTO">
+		SELECT 
+			SEQ AS seq, 
+			TITLE, CONTENT, 
+			USER_NAME,
+			REG_DATE,
+			READ_CNT
+		FROM BOARD
+			LIMIT #{startIndex},8
+   </select>
+  
+  <!--  <![CDATA[
+         SELECT
+         TITLE
+			CONTENT,
+			REG_DT,
+			BOARD_SEQ,
+			READ_CNT,
+			USER_NAME,
+			STARCHECK 
+         FROM
+             (
+                 SELECT
+                     A.*,
+                     ROWNUM
+                 FROM
+                     (
+                         SELECT
+                             *
+                         FROM
+                             BOARD
+                         ORDER BY
+                             BOARD_SEQ DESC,REG_DT
+                      
+                     ) A
+                 WHERE
+                     ROWNUM <= #{endIndex}
+             )
+         WHERE
+             RNUM >= #{startIndex}
+   ]]> -->
+
+
+	<!--게시판 상세보기-->
+	<select id="getBoardDetail" parameterType="BoardDTO" resultType="BoardDTO">
+		SELECT
+			SEQ as seq,
+			TITLE,
+			CONTENT,
+			REG_DT,
+			READ_CNT,
+			USER_NAME
+		FROM
+			BOARD
+		WHERE
+			SEQ = #{seq}
+	</select>
+	
+	<!--게시판 글 쓰기-->
+	<update id="updateBoard" parameterType="BoardDTO">
+		UPDATE
+			BOARD
+		SET
+			TITLE = #{title},
+			CONTENT = #{content}
+		WHERE
+			SEQ =#{seq}
+	</update>
+	
+	<!--게시판 글 삭제-->
+	<delete id="deleteBoard" parameterType="BoardDTO">
+	
+		DELETE FROM BOARD
+		WHERE SEQ = #{seq}	
+			
+	</delete>
+	
+	<!--게시판 조회수-->
+	<update id="updateBoardReadCnt" parameterType="BoardDTO">
+		UPDATE BOARD
+		SET read_cnt = read_cnt + 1
+		WHERE SEQ = #{seq}	
+	</update>
+	
+	
+	  <!-- 공지사항 리스트 개수 -->
+   <select id="listall" resultType="int">
+      SELECT 
+      	COUNT(*) as count 
+      FROM
+		BOARD
+   </select>
+   
+<!-- 	
+	<delete id="UserBoardDelete" parameterType="String">
+		DELETE
+		FROM BOARD
+		WHERE USER_NAME = #{user_name}
+	</delete>
+ -->
+ 
+	<!-- 댓글 작성 실행 writeReply -->
+	<insert id="insertComment" parameterType="CommentDTO">
+		INSERT INTO REPLY (
+			SEQ as seq,
+			CONTENT,
+			WRITER
+		)
+		VALUES(
+			#{board_seq},
+			#{content},
+			#{writer}
+		)
+	</insert>
+	
+	<!-- 댓글 리스트 조회-->
+	<select id="readReply" parameterType="CommentDTO">
+		SELECT
+			SEQ as seq,
+			CONTENT,
+			WRITER
+		FROM
+			REPLY
+		WHERE SEQ = #{seq}	
+	</select>
+	
+ 
+</mapper>
